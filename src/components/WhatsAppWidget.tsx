@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const WA_NUMBER = "59898331920";
@@ -9,6 +9,12 @@ const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MESSAGE}`;
 
 export function WhatsAppWidget() {
   const [open, setOpen] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowGreeting(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
@@ -118,9 +124,43 @@ export function WhatsAppWidget() {
         )}
       </AnimatePresence>
 
+      {/* Greeting tooltip */}
+      <AnimatePresence>
+        {showGreeting && !open && (
+          <motion.div
+            initial={{ opacity: 0, x: 16, scale: 0.92 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 16, scale: 0.92 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] }}
+            className="flex items-center gap-2 cursor-pointer select-none"
+            onClick={() => { setOpen(true); setShowGreeting(false); }}
+          >
+            <div
+              className="px-4 py-2.5 rounded-2xl rounded-br-sm text-sm text-white font-medium shadow-xl whitespace-nowrap"
+              style={{
+                background: "linear-gradient(145deg, #0E1525, #0A1020)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+              }}
+            >
+              Hola, ¿en qué te podemos ayudar? 👋
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowGreeting(false); }}
+              className="w-5 h-5 rounded-full bg-[#1C2333] flex items-center justify-center text-[#8892A4] hover:text-white transition-colors flex-shrink-0"
+              aria-label="Cerrar saludo"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Floating button */}
       <motion.button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); setShowGreeting(false); }}
         className="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
         style={{
           background: "linear-gradient(135deg, #128C7E, #25D366)",
