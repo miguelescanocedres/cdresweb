@@ -101,7 +101,7 @@ export function WhyCdres() {
             transition={{ duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }}
           >
             <p className="text-xs font-mono tracking-[0.25em] text-[#0066FF] uppercase mb-4">
-              // Por qué Cdres
+              // Por qué <span className="text-white">C</span><span className="text-[#0066FF]">DRES</span> <span className="text-[#8892A4]">INTEC</span>
             </p>
             <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
               No somos otra{" "}

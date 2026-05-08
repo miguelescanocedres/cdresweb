@@ -6,10 +6,10 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0">
             <span className="font-[family-name:var(--font-heading)] text-lg font-bold text-white">C</span>
-            <span className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#0066FF]">dres</span>
-            <span className="text-xs text-[#C2C6D8] ml-2">Soluciones Informáticas</span>
+            <span className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#0066FF]">DRES</span>
+            <span className="font-[family-name:var(--font-heading)] text-xs font-semibold text-[#8892A4] tracking-widest ml-2 self-center">INTEC</span>
           </div>
 
           {/* Links */}
@@ -21,7 +21,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-xs text-[#C2C6D8]">
-            © {year} Cdres. Todos los derechos reservados.
+            © {year} CDRES INTEC. Todos los derechos reservados.
           </p>
         </div>
       </div>
