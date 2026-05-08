@@ -129,27 +129,36 @@ class Particle {
 
 interface ParticleTextEffectProps {
   words?: string[]
-  particleColor?: { r: number; g: number; b: number }
+  particleColors?: { r: number; g: number; b: number }[]
   canvasWidth?: number
   canvasHeight?: number
   maxParticles?: number
+  wordChangeSpeed?: number
 }
 
 const DEFAULT_WORDS = ["CDRES", "AUTOMATIZACIÓN", "IA", "VELOCIDAD"]
-const DEFAULT_COLOR = { r: 0, g: 102, b: 255 } // #0066FF
+const BLUE_PALETTE = [
+  { r: 0, g: 102, b: 255 },     // #0066FF - Primary blue
+  { r: 0, g: 153, b: 255 },     // #0099FF - Light blue
+  { r: 0, g: 76, b: 204 },      // #004CCC - Dark blue
+  { r: 51, g: 136, b: 255 },    // #3388FF - Soft blue
+  { r: 25, g: 118, b: 210 },    // #1976D2 - Medium blue
+]
 
 export function ParticleTextEffect({
   words = DEFAULT_WORDS,
-  particleColor = DEFAULT_COLOR,
+  particleColors = BLUE_PALETTE,
   canvasWidth = 1000,
   canvasHeight = 500,
-  maxParticles = 700,
+  maxParticles = 1200,
+  wordChangeSpeed = 120,
 }: ParticleTextEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number | null>(null)
   const particlesRef = useRef<Particle[]>([])
   const frameCountRef = useRef(0)
   const wordIndexRef = useRef(0)
+  const colorIndexRef = useRef(0)
   const mouseRef = useRef({ x: 0, y: 0, isPressed: false })
 
   const pixelSteps = 6
@@ -191,7 +200,8 @@ export function ParticleTextEffect({
     const imageData = offscreenCtx.getImageData(0, 0, canvas.width, canvas.height)
     const pixels = imageData.data
 
-    const newColor = particleColor
+    const newColor = particleColors[colorIndexRef.current % particleColors.length]
+    colorIndexRef.current++
 
     const particles = particlesRef.current
     let particleIndex = 0
@@ -294,7 +304,7 @@ export function ParticleTextEffect({
     }
 
     frameCountRef.current++
-    if (frameCountRef.current % 240 === 0) {
+    if (frameCountRef.current % wordChangeSpeed === 0) {
       wordIndexRef.current = (wordIndexRef.current + 1) % words.length
       nextWord(words[wordIndexRef.current], canvas)
     }

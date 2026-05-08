@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { WhyCdres } from "@/components/WhyCdres";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
+import { MotionFooter } from "@/components/ui/motion-footer";
 import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
         <CTASection />
       </main>
       <Footer />
+      <MotionFooter />
       <WhatsAppWidget />
     </>
   );

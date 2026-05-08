@@ -72,10 +72,17 @@ export function ParticleHero() {
         >
           <ParticleTextEffect
             words={["CDRES", "AUTOMATIZACIÓN", "IA", "VELOCIDAD"]}
-            particleColor={{ r: 0, g: 102, b: 255 }}
+            particleColors={[
+              { r: 0, g: 102, b: 255 },     // #0066FF
+              { r: 0, g: 153, b: 255 },     // #0099FF
+              { r: 0, g: 76, b: 204 },      // #004CCC
+              { r: 51, g: 136, b: 255 },    // #3388FF
+              { r: 25, g: 118, b: 210 },    // #1976D2
+            ]}
             canvasWidth={1000}
             canvasHeight={500}
-            maxParticles={700}
+            maxParticles={1200}
+            wordChangeSpeed={120}
           />
         </motion.div>
 
