@@ -13,11 +13,13 @@ export function Footer() {
           </div>
 
           {/* Links */}
-          <div className="flex items-center gap-6 text-sm text-[#C2C6D8]">
-            <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
-            <a href="#proceso" className="hover:text-white transition-colors">Proceso</a>
-            <a href="#contacto" className="hover:text-white transition-colors">Contacto</a>
-          </div>
+          <nav aria-label="Footer navigation">
+            <div className="flex items-center gap-6 text-sm text-[#C2C6D8]">
+              <a href="#servicios" className="hover:text-white transition-colors focus-visible:text-white">Servicios</a>
+              <a href="#proceso" className="hover:text-white transition-colors focus-visible:text-white">Proceso</a>
+              <a href="#contacto" className="hover:text-white transition-colors focus-visible:text-white">Contacto</a>
+            </div>
+          </nav>
 
           {/* Copyright */}
           <p className="text-xs text-[#C2C6D8]">

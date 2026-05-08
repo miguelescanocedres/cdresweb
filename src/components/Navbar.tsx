@@ -83,7 +83,7 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             href="#contacto"
-            className="gradient-blue text-white text-sm font-medium px-5 py-2.5 rounded-md hover:opacity-90 transition-opacity glow-blue"
+            className="gradient-blue text-white text-sm font-medium px-5 py-2.5 rounded-md hover:opacity-90 hover:scale-[1.02] transition-all glow-blue focus-visible:ring-2 focus-visible:ring-[#0066FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060B12]"
           >
             Agendar llamada
           </Link>
@@ -91,9 +91,11 @@ export function Navbar() {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden text-[#C2C6D8] hover:text-white"
+          className="md:hidden text-[#C2C6D8] hover:text-white rounded-md"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menu"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {menuOpen ? (
@@ -107,7 +109,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden glass border-t border-white/5 mt-3 px-6 py-4 flex flex-col gap-4">
+        <div id="mobile-menu" className="md:hidden glass border-t border-white/5 mt-3 px-6 py-4 flex flex-col gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.href}

@@ -141,13 +141,13 @@ export function Hero() {
           >
             <Link
               href="#servicios"
-              className="gradient-blue text-white font-semibold px-7 py-3.5 rounded-lg hover:opacity-90 transition-all glow-blue text-sm tracking-wide"
+              className="gradient-blue text-white font-semibold px-7 py-3.5 rounded-lg hover:opacity-90 hover:scale-[1.02] transition-all glow-blue text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-[#0066FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060B12]"
             >
               Ver servicios
             </Link>
             <Link
               href="#contacto"
-              className="text-white font-semibold px-7 py-3.5 rounded-lg border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all text-sm tracking-wide"
+              className="text-white font-semibold px-7 py-3.5 rounded-lg border border-white/10 hover:border-[#0066FF]/40 hover:bg-white/5 hover:scale-[1.02] transition-all text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060B12]"
             >
               Agendar llamada
             </Link>

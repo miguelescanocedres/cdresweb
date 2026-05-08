@@ -7,24 +7,34 @@ export function HeroSplash() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let rafId: number | null = null
+
     const handleScroll = () => {
-      if (!containerRef.current) return
-      const scrollY = window.scrollY
-      const windowHeight = window.innerHeight
-      const progress = Math.min(1, scrollY / windowHeight)
-      const scale = 1 - progress * 0.15
-      const opacity = 1 - progress * 1.4
-      containerRef.current.style.transform = `scale(${scale})`
-      containerRef.current.style.opacity = `${Math.max(0, opacity)}`
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        if (!containerRef.current) return
+        const scrollY = window.scrollY
+        const windowHeight = window.innerHeight
+        const progress = Math.min(1, scrollY / windowHeight)
+        const scale = 1 - progress * 0.15
+        const opacity = 1 - progress * 1.4
+        containerRef.current.style.transform = `scale(${scale})`
+        containerRef.current.style.opacity = `${Math.max(0, opacity)}`
+      })
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [])
 
   return (
     <section
       className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden"
       style={{ background: "#060B12" }}
+      aria-label="CDRES INTEC — Soluciones Informáticas"
     >
       {/* Grid overlay */}
       <div className="absolute inset-0 bg-grid opacity-100 pointer-events-none" />

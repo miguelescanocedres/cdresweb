@@ -160,8 +160,8 @@ export function Services() {
             <div className="relative z-10 flex items-center justify-center md:w-40 flex-shrink-0">
               <div className="relative w-32 h-32">
                 <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, rgba(${services[0].accentRgb},0.15) 0%, transparent 70%)`, filter: "blur(12px)" }} />
-                <div className="absolute inset-4 rounded-full border" style={{ borderColor: `rgba(${services[0].accentRgb},0.3)`, animation: "spin 12s linear infinite" }} />
-                <div className="absolute inset-8 rounded-full border" style={{ borderColor: `rgba(${services[0].accentRgb},0.5)`, animation: "spin 8s linear infinite reverse" }} />
+                <div aria-hidden="true" className="absolute inset-4 rounded-full border" style={{ borderColor: `rgba(${services[0].accentRgb},0.3)`, animation: "spin 12s linear infinite" }} />
+                <div aria-hidden="true" className="absolute inset-8 rounded-full border" style={{ borderColor: `rgba(${services[0].accentRgb},0.5)`, animation: "spin 8s linear infinite reverse" }} />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-8 h-8 rounded-full" style={{ background: `radial-gradient(circle, rgba(${services[0].accentRgb},0.9), rgba(${services[0].accentRgb},0.3))`, boxShadow: `0 0 20px rgba(${services[0].accentRgb},0.6)` }} />
                 </div>
