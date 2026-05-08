@@ -2,6 +2,13 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -19,8 +26,44 @@ const trustItems = [
 ];
 
 export function Hero() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const rightColumnRef = useRef<HTMLDivElement>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !heroRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Parallax effect on right column (AnimatedBrandText)
+      gsap.to(rightColumnRef.current, {
+        y: -50,
+        ease: "power1.out",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.5,
+        },
+      });
+
+      // Subtle float animation on left text
+      gsap.to(leftColumnRef.current, {
+        y: 30,
+        ease: "power1.out",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.5,
+        },
+      });
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: "#060B12" }}>
+    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden" style={{ background: "#060B12" }}>
       {/* Grid overlay */}
       <div className="absolute inset-0 bg-grid opacity-100 pointer-events-none" />
 
@@ -49,7 +92,7 @@ export function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-6 py-32 grid md:grid-cols-2 gap-16 items-center">
         {/* Left column */}
-        <div className="flex flex-col gap-8 z-10">
+        <div ref={leftColumnRef} className="flex flex-col gap-8 z-10">
           {/* Badge */}
           <motion.div
             initial="hidden"
@@ -130,7 +173,7 @@ export function Hero() {
         </div>
 
         {/* Right column — Animated brand letters */}
-        <div className="relative flex flex-col items-center justify-center gap-8 z-10">
+        <div ref={rightColumnRef} className="relative flex flex-col items-center justify-center gap-8 z-10">
           <AnimatedBrandText />
         </div>
       </div>

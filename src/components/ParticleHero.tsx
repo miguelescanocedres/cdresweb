@@ -82,7 +82,7 @@ export function ParticleHero() {
             canvasWidth={1000}
             canvasHeight={500}
             maxParticles={1200}
-            wordChangeSpeed={120}
+            wordChangeSpeed={200}
           />
         </motion.div>
 

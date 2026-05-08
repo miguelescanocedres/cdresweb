@@ -22,7 +22,6 @@ export default function Home() {
         <CTASection />
       </main>
       <Footer />
-      <MotionFooter />
       <WhatsAppWidget />
     </>
   );
