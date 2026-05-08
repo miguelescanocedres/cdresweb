@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Services } from "@/components/Services";
+import { ParticleHero } from "@/components/ParticleHero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { WhyCdres } from "@/components/WhyCdres";
 import { CTASection } from "@/components/CTASection";
@@ -14,6 +15,7 @@ export default function Home() {
       <main>
         <Hero />
         <Services />
+        <ParticleHero />
         <HowItWorks />
         <WhyCdres />
         <CTASection />
