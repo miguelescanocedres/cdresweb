@@ -74,19 +74,19 @@ export function HeroSplash() {
         }}
       >
         {/* Vaporize Logo - Custom render with C white + DRES blue */}
-        <div className="flex items-center justify-center gap-0">
+        <div className="flex items-center justify-center gap-0 flex-wrap">
           {/* C in white */}
-          <div className="text-white" style={{ fontSize: "clamp(80px, 15vw, 180px)", fontWeight: 900, fontFamily: "Space Grotesk, sans-serif", lineHeight: 1 }}>
+          <div className="text-white" style={{ fontSize: "clamp(100px, 20vw, 240px)", fontWeight: 900, fontFamily: "Space Grotesk, sans-serif", lineHeight: 1 }}>
             C
           </div>
 
           {/* DRES in blue - Vaporize effect */}
-          <div className="w-full max-w-2xl" style={{ height: "clamp(80px, 15vw, 180px)" }}>
+          <div style={{ minWidth: "clamp(300px, 60vw, 900px)", height: "clamp(100px, 20vw, 240px)" }}>
             <VaporizeTextCycle
               texts={["DRES"]}
               font={{
                 fontFamily: "Space Grotesk, sans-serif",
-                fontSize: "clamp(80px, 15vw, 180px)",
+                fontSize: "clamp(100px, 20vw, 240px)",
                 fontWeight: 900,
               }}
               color="rgb(0, 102, 255)"
@@ -106,7 +106,8 @@ export function HeroSplash() {
 
         {/* Tagline */}
         <motion.p
-          className="text-xs md:text-sm font-mono tracking-[0.3em] text-[#8892A4] uppercase mt-8 text-center"
+          className="font-mono tracking-[0.3em] text-[#8892A4] uppercase mt-8 text-center"
+          style={{ fontSize: "clamp(12px, 2vw, 24px)" }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
