@@ -34,13 +34,20 @@ export function ScrollAnimation3D() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // contain: imagen completa sin recorte, centrada, fondo negro
     const ia = img.naturalWidth / img.naturalHeight;
     const ca = w / h;
-    let dw = w, dh = h, dx = 0, dy = 0;
-    if (ia > ca) { dw = h * ia; dx = (w - dw) / 2; }
-    else         { dh = w / ia; dy = (h - dh) / 2; }
+    let dw: number, dh: number, dx: number, dy: number;
+    if (ia > ca) {
+      dw = w; dh = w / ia;
+      dx = 0; dy = (h - dh) / 2;
+    } else {
+      dh = h; dw = h * ia;
+      dx = (w - dw) / 2; dy = 0;
+    }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
     ctx.drawImage(img, dx, dy, dw, dh);
   };
 
