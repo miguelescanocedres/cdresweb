@@ -172,8 +172,9 @@ export function ScrollAnimation3D() {
           className="block"
           style={{
             aspectRatio: '16 / 9',
-            width: '100%',
-            maxWidth: `calc(100dvh * ${VIDEO_ASPECT})`,
+            /* Desktop/landscape: limitado por altura del viewport */
+            width: `min(100vw, calc(100dvh * ${VIDEO_ASPECT}))`,
+            maxWidth: '100vw',
             maxHeight: '100dvh',
             display: 'block',
           }}
