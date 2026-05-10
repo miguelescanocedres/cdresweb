@@ -160,12 +160,7 @@ export function ScrollAnimation3D() {
       */}
       <div
         className="sticky top-0 w-full overflow-hidden flex items-center justify-center bg-black"
-        style={{
-          /* Desktop landscape: full viewport height */
-          height: '100dvh',
-          /* Mobile portrait: shrink to fit 16:9 canvas width = 100vw → height = 100vw / (16/9) */
-          maxHeight: `min(100dvh, calc(100vw / ${VIDEO_ASPECT}))`,
-        }}
+        style={{ height: '100dvh' }}
       >
         {/*
           El canvas tiene aspect-ratio 16/9 forzado.
