@@ -11,24 +11,26 @@ export function ScrollAnimation3D() {
   const images = useRef<HTMLImageElement[]>([]);
   const currentFrame = useRef(0);
   const raf = useRef<number>(0);
-  const canvasReady = useRef(false);
   const [loadedCount, setLoadedCount] = useState(0);
 
-  // Dimensionar canvas una sola vez al montar
-  const sizeCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || canvasReady.current) return;
+  // Redimensionar canvas al tamaño real del elemento (DPR-aware)
+  const sizeCanvas = (canvas: HTMLCanvasElement) => {
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = canvas.offsetWidth * dpr;
-    canvas.height = canvas.offsetHeight * dpr;
-    canvasReady.current = true;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if (w === 0 || h === 0) return false;
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+    }
+    return true;
   };
 
-  // Dibujar frame en canvas con cover-fit
+  // Dibujar frame con cover-fit
   const paint = (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas || !img?.complete || !img.naturalWidth) return;
-    sizeCanvas();
+    if (!sizeCanvas(canvas)) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -43,12 +45,12 @@ export function ScrollAnimation3D() {
 
     let w = dw, h = dh, x = 0, y = 0;
     if (ia > ca) { w = dh * ia; x = (dw - w) / 2; }
-    else          { h = dw / ia; y = (dh - h) / 2; }
+    else { h = dw / ia; y = (dh - h) / 2; }
 
     ctx.drawImage(img, x, y, w, h);
   };
 
-  // Precarga progresiva — pinta frame 0 en cuanto llega
+  // Precarga progresiva
   useEffect(() => {
     const imgs: HTMLImageElement[] = [];
     let done = 0;
@@ -66,48 +68,68 @@ export function ScrollAnimation3D() {
       imgs.push(img);
     }
     images.current = imgs;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Scroll → frame con RAF throttle
   useEffect(() => {
+    const tick = () => {
+      raf.current = 0;
+      const el = containerRef.current;
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const scrollable = el.offsetHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+
+      const scrolled = Math.max(0, -rect.top);
+      const progress = Math.min(1, scrolled / scrollable);
+      const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+
+      if (idx !== currentFrame.current) {
+        currentFrame.current = idx;
+        const img = images.current[idx];
+        if (img?.complete) paint(img);
+      }
+    };
+
     const onScroll = () => {
       if (raf.current) return;
-      raf.current = requestAnimationFrame(() => {
-        raf.current = 0;
-        const el = containerRef.current;
-        if (!el) return;
-
-        const rect = el.getBoundingClientRect();
-        const scrollable = el.offsetHeight - window.innerHeight;
-        const scrolled = Math.max(0, -rect.top);
-        const progress = Math.min(1, scrolled / scrollable);
-        const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
-
-        if (idx !== currentFrame.current) {
-          currentFrame.current = idx;
-          const img = images.current[idx];
-          if (img?.complete) paint(img);
-        }
-      });
+      raf.current = requestAnimationFrame(tick);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // estado inicial
+
+    // Primer paint diferido: esperar a que el layout esté completo
+    // (requestAnimationFrame garantiza que offsetWidth ya tiene valor real)
+    raf.current = requestAnimationFrame(() => {
+      raf.current = 0;
+      const img = images.current[0];
+      if (img?.complete) paint(img);
+    });
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (raf.current) cancelAnimationFrame(raf.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-dimensionar canvas en resize
+  // Resize: recalcular canvas y repintar frame actual
   useEffect(() => {
     const onResize = () => {
-      canvasReady.current = false;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Forzar recálculo de dimensiones
+        canvas.width = 0;
+        canvas.height = 0;
+      }
       const img = images.current[currentFrame.current];
       if (img?.complete) paint(img);
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pct = Math.round((loadedCount / TOTAL_FRAMES) * 100);
@@ -119,21 +141,20 @@ export function ScrollAnimation3D() {
       className="relative w-full bg-black"
       style={{ height: '500vh' }}
     >
-      {/* sticky cubre 100dvh incluyendo zona detrás de la navbar fixed */}
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div className="sticky top-0 w-full overflow-hidden" style={{ height: '100dvh' }}>
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
           style={{ display: 'block' }}
         />
 
-        {/* Gradiente inferior — transición suave hacia la siguiente sección */}
+        {/* Gradiente inferior — fluye hacia Services */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
           style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
         />
 
-        {/* Barra de carga — delgada, discreta, sobre el gradiente */}
+        {/* Barra de carga */}
         {loading && (
           <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
             <div
