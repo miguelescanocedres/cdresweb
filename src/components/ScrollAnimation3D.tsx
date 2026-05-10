@@ -1,199 +1,140 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 
 const TOTAL_FRAMES = 192;
-const FRAME_PATH = '/frames/frame_';
+const FRAME_BASE = '/frames/frame_';
 
-interface ScrollAnimation3DProps {
-  title?: string;
-  description?: string;
-}
-
-export function ScrollAnimation3D({
-  title = 'CDRES en Acción',
-  description = 'Automatización inteligente transformando procesos manuales en sistemas escalables',
-}: ScrollAnimation3DProps) {
+export function ScrollAnimation3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const frameImagesRef = useRef<HTMLImageElement[]>([]);
-  const currentFrameRef = useRef(0);
-  const rafRef = useRef<number | undefined>(undefined);
-  const canvasSizedRef = useRef(false);
+  const images = useRef<HTMLImageElement[]>([]);
+  const currentFrame = useRef(0);
+  const raf = useRef<number>(0);
+  const canvasReady = useRef(false);
   const [loadedCount, setLoadedCount] = useState(0);
-  const [ready, setReady] = useState(false);
 
-  // Precargar frames progresivamente — arrancar con frame 0 visible apenas cargue
-  useEffect(() => {
-    const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
-    let loaded = 0;
-
-    const onLoad = (i: number) => {
-      loaded++;
-      // Mostrar primer frame apenas esté listo
-      if (i === 0) drawFrame(images[0]);
-      // Marcar como ready cuando llegamos al 100%
-      if (loaded === TOTAL_FRAMES) setReady(true);
-      setLoadedCount(loaded);
-    };
-
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
-      const img = new Image();
-      const frameNum = String(i + 1).padStart(6, '0');
-      img.src = `${FRAME_PATH}${frameNum}.jpg`;
-      img.onload = () => onLoad(i);
-      img.onerror = () => onLoad(i);
-      images[i] = img;
-    }
-
-    frameImagesRef.current = images;
-  }, []);
-
-  // Inicializar dimensiones del canvas una sola vez (evitar resize en cada frame)
-  const initCanvas = () => {
+  // Dimensionar canvas una sola vez al montar
+  const sizeCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas || canvasSizedRef.current) return;
+    if (!canvas || canvasReady.current) return;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = canvas.offsetWidth * dpr;
     canvas.height = canvas.offsetHeight * dpr;
-    canvasSizedRef.current = true;
+    canvasReady.current = true;
   };
 
-  const drawFrame = (img: HTMLImageElement) => {
+  // Dibujar frame en canvas con cover-fit
+  const paint = (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas || !img?.complete || !img.naturalWidth) return;
+    sizeCanvas();
 
-    initCanvas();
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const displayW = canvas.offsetWidth;
-    const displayH = canvas.offsetHeight;
+    const dw = canvas.offsetWidth;
+    const dh = canvas.offsetHeight;
+    const ia = img.naturalWidth / img.naturalHeight;
+    const ca = dw / dh;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Cover: escalar para cubrir todo el canvas manteniendo aspect ratio
-    const imgAspect = img.naturalWidth / img.naturalHeight;
-    const canvasAspect = displayW / displayH;
+    let w = dw, h = dh, x = 0, y = 0;
+    if (ia > ca) { w = dh * ia; x = (dw - w) / 2; }
+    else          { h = dw / ia; y = (dh - h) / 2; }
 
-    let drawW = displayW;
-    let drawH = displayH;
-    let ox = 0;
-    let oy = 0;
-
-    if (imgAspect > canvasAspect) {
-      drawW = displayH * imgAspect;
-      ox = (displayW - drawW) / 2;
-    } else {
-      drawH = displayW / imgAspect;
-      oy = (displayH - drawH) / 2;
-    }
-
-    ctx.drawImage(img, ox, oy, drawW, drawH);
+    ctx.drawImage(img, x, y, w, h);
   };
 
-  // Scroll handler — mapea scroll a frame index con RAF throttling
+  // Precarga progresiva — pinta frame 0 en cuanto llega
   useEffect(() => {
-    const handleScroll = () => {
-      if (rafRef.current !== undefined && rafRef.current !== 0) return;
+    const imgs: HTMLImageElement[] = [];
+    let done = 0;
 
-      rafRef.current = requestAnimationFrame(() => {
-        const container = containerRef.current;
-        if (!container) { rafRef.current = 0; return; }
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = `${FRAME_BASE}${String(i + 1).padStart(6, '0')}.jpg`;
+      img.onload = () => {
+        done++;
+        if (i === 0) paint(img);
+        setLoadedCount(done);
+      };
+      img.onerror = () => { done++; setLoadedCount(done); };
+      imgs.push(img);
+    }
+    images.current = imgs;
+  }, []);
 
-        const rect = container.getBoundingClientRect();
-        const viewportH = window.innerHeight;
-        const totalScroll = rect.height - viewportH;
+  // Scroll → frame con RAF throttle
+  useEffect(() => {
+    const onScroll = () => {
+      if (raf.current) return;
+      raf.current = requestAnimationFrame(() => {
+        raf.current = 0;
+        const el = containerRef.current;
+        if (!el) return;
 
-        // Progreso basado en cuánto se ha scrolleado dentro del sticky container
+        const rect = el.getBoundingClientRect();
+        const scrollable = el.offsetHeight - window.innerHeight;
         const scrolled = Math.max(0, -rect.top);
-        const progress = Math.min(1, scrolled / totalScroll);
+        const progress = Math.min(1, scrolled / scrollable);
+        const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
 
-        const frameIndex = Math.min(
-          TOTAL_FRAMES - 1,
-          Math.floor(progress * TOTAL_FRAMES)
-        );
-
-        if (frameIndex !== currentFrameRef.current) {
-          currentFrameRef.current = frameIndex;
-          const img = frameImagesRef.current[frameIndex];
-          if (img?.complete) drawFrame(img);
+        if (idx !== currentFrame.current) {
+          currentFrame.current = idx;
+          const img = images.current[idx];
+          if (img?.complete) paint(img);
         }
-
-        rafRef.current = 0;
       });
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Trigger inicial
-    handleScroll();
-
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // estado inicial
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('scroll', onScroll);
+      if (raf.current) cancelAnimationFrame(raf.current);
     };
   }, []);
 
-  // Manejar resize de ventana
+  // Re-dimensionar canvas en resize
   useEffect(() => {
-    const handleResize = () => {
-      canvasSizedRef.current = false;
-      const img = frameImagesRef.current[currentFrameRef.current];
-      if (img?.complete) drawFrame(img);
+    const onResize = () => {
+      canvasReady.current = false;
+      const img = images.current[currentFrame.current];
+      if (img?.complete) paint(img);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const loadPercent = Math.round((loadedCount / TOTAL_FRAMES) * 100);
-  const isLoading = loadedCount < TOTAL_FRAMES;
+  const pct = Math.round((loadedCount / TOTAL_FRAMES) * 100);
+  const loading = loadedCount < TOTAL_FRAMES;
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full bg-black overflow-hidden"
-      style={{ height: '400vh' }}
+      className="relative w-full bg-black"
+      style={{ height: '500vh' }}
     >
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Canvas principal */}
         <canvas
           ref={canvasRef}
-          className="w-full h-full"
+          className="absolute inset-0 w-full h-full"
           style={{ display: 'block' }}
         />
 
-        {/* Barra de progreso de carga */}
-        {isLoading && (
-          <div className="absolute bottom-0 left-0 right-0 z-20">
+        {/* Barra de carga — delgada, discreta, en el borde inferior */}
+        {loading && (
+          <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
             <div
-              className="h-0.5 bg-blue-500 transition-all duration-100"
-              style={{ width: `${loadPercent}%` }}
+              className="h-full bg-blue-500 transition-all duration-75"
+              style={{ width: `${pct}%` }}
             />
           </div>
         )}
-
-        {/* Overlay gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/50 pointer-events-none" />
-
-        {/* Texto superpuesto */}
-        <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-4 pointer-events-none"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          {ready && (
-            <div className="max-w-2xl text-center">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                {title}
-              </h2>
-              <p className="text-lg md:text-xl text-gray-300 drop-shadow-md">{description}</p>
-            </div>
-          )}
-        </motion.div>
       </div>
     </section>
   );
