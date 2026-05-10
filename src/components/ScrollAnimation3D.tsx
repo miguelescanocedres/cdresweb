@@ -149,8 +149,8 @@ export function ScrollAnimation3D() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full bg-black"
-      style={{ height: '220vh' }}
+      className="relative w-full"
+      style={{ height: '220vh', background: '#060B12' }}
     >
       {/*
         sticky wrapper: altura = 100vw / (16/9) capped a 100dvh
@@ -159,8 +159,8 @@ export function ScrollAnimation3D() {
         Si el viewport es muy alto (ultrawide vertical), se capa a 100dvh.
       */}
       <div
-        className="sticky top-0 w-full overflow-hidden flex items-center justify-center bg-black"
-        style={{ height: '100dvh' }}
+        className="sticky top-0 w-full overflow-hidden flex items-start justify-center"
+        style={{ height: '100dvh', background: 'transparent' }}
       >
         {/*
           El canvas tiene aspect-ratio 16/9 forzado.
