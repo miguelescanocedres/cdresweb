@@ -115,11 +115,6 @@ export function ScrollAnimation3D() {
       const img = images.current[idx];
       if (img?.complete) paint(img);
 
-      // Desplaza el canvas hacia abajo a medida que avanza la animación
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.style.transform = `translateY(${progress * 12}%)`;
-      }
     };
 
     const onScroll = () => {
@@ -155,7 +150,7 @@ export function ScrollAnimation3D() {
     <section
       ref={containerRef}
       className="relative w-full bg-black"
-      style={{ height: '500vh' }}
+      style={{ height: '220vh' }}
     >
       {/*
         sticky wrapper: altura = 100vw / (16/9) capped a 100dvh
