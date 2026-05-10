@@ -119,6 +119,7 @@ export function ScrollAnimation3D() {
       className="relative w-full bg-black"
       style={{ height: '500vh' }}
     >
+      {/* sticky cubre 100dvh incluyendo zona detrás de la navbar fixed */}
       <div className="sticky top-0 h-screen overflow-hidden">
         <canvas
           ref={canvasRef}
@@ -126,7 +127,13 @@ export function ScrollAnimation3D() {
           style={{ display: 'block' }}
         />
 
-        {/* Barra de carga — delgada, discreta, en el borde inferior */}
+        {/* Gradiente inferior — transición suave hacia la siguiente sección */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
+        />
+
+        {/* Barra de carga — delgada, discreta, sobre el gradiente */}
         {loading && (
           <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
             <div

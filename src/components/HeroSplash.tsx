@@ -1,34 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 import { motion } from "framer-motion"
 
 export function HeroSplash() {
   const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    let rafId: number | null = null
-
-    const handleScroll = () => {
-      if (rafId) return
-      rafId = requestAnimationFrame(() => {
-        rafId = null
-        if (!containerRef.current) return
-        const scrollY = window.scrollY
-        const windowHeight = window.innerHeight
-        const progress = Math.min(1, scrollY / windowHeight)
-        const scale = 1 - progress * 0.15
-        const opacity = 1 - progress * 1.4
-        containerRef.current.style.transform = `scale(${scale})`
-        containerRef.current.style.opacity = `${Math.max(0, opacity)}`
-      })
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      if (rafId) cancelAnimationFrame(rafId)
-    }
-  }, [])
 
   return (
     <section
@@ -36,6 +12,12 @@ export function HeroSplash() {
       style={{ background: "#060B12" }}
       aria-label="CDRES INTEC — Soluciones Informáticas"
     >
+      {/* Gradiente superior — transición desde la sección anterior */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+        style={{ height: '12vh', background: 'linear-gradient(to top, transparent, #060B12)' }}
+      />
+
       {/* Grid overlay */}
       <div className="absolute inset-0 bg-grid opacity-100 pointer-events-none" />
 
@@ -139,16 +121,6 @@ export function HeroSplash() {
         </motion.p>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.2, duration: 0.8 }}
-      >
-        <span className="text-[10px] text-[#8892A4] tracking-[0.25em] uppercase font-mono">scroll</span>
-        <div className="w-px h-10 bg-gradient-to-b from-[#0066FF]/60 to-transparent animate-scroll-bounce" />
-      </motion.div>
     </section>
   )
 }

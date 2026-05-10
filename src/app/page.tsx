@@ -24,13 +24,13 @@ export default function Home() {
     <>
       <Navbar />
       <main>
-        <HeroSplash />
-        <Services />
         <ScrollAnimation3D />
+        <Services />
         <ParticleHero />
         <HowItWorks />
         <WhyCdres />
         <CTASection />
+        <HeroSplash />
       </main>
       <Footer />
       <WhatsAppWidget />
