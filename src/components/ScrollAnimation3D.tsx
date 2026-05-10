@@ -5,18 +5,19 @@ import { motion } from 'framer-motion';
 
 const TOTAL_FRAMES = 192;
 const FRAME_BASE = '/frames/frame_';
+const VIDEO_ASPECT = 16 / 9; // 1920×1080
 
 export function ScrollAnimation3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const images = useRef<HTMLImageElement[]>([]);
   const currentFrame = useRef(0);
   const raf = useRef<number>(0);
   const [loadedCount, setLoadedCount] = useState(0);
   const [showHint, setShowHint] = useState(true);
 
-  // paint — cover-fit, recalcula dimensiones desde el elemento real
+  // Dibuja img en canvas — canvas tiene exactamente el aspect ratio del video,
+  // así que siempre es un fill 1:1 sin barras ni recorte
   const paint = (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas || !img?.complete || !img.naturalWidth) return;
@@ -26,37 +27,27 @@ export function ScrollAnimation3D() {
     const h = canvas.offsetHeight;
     if (w === 0 || h === 0) return;
 
-    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
+    // Solo redimensiona si cambió (evita flush de layout)
+    const tw = Math.round(w * dpr);
+    const th = Math.round(h * dpr);
+    if (canvas.width !== tw || canvas.height !== th) {
+      canvas.width = tw;
+      canvas.height = th;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // contain: imagen completa sin recorte, centrada, fondo negro
-    const ia = img.naturalWidth / img.naturalHeight;
-    const ca = w / h;
-    let dw: number, dh: number, dx: number, dy: number;
-    if (ia > ca) {
-      dw = w; dh = w / ia;
-      dx = 0; dy = (h - dh) / 2;
-    } else {
-      dh = h; dw = h * ia;
-      dx = (w - dw) / 2; dy = 0;
-    }
-
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(img, dx, dy, dw, dh);
+    // Canvas ya tiene el aspect ratio correcto → fill directo, sin barras
+    ctx.drawImage(img, 0, 0, w, h);
   };
 
   const paintCurrent = () => {
     const img = images.current[currentFrame.current];
-    if (img?.complete) paint(img);
+    if (img?.complete && img.naturalWidth) paint(img);
   };
 
-  // Precarga progresiva
+  // Precarga — frame 0 dispara primer paint con retry hasta que el canvas tenga dimensiones
   useEffect(() => {
     const imgs: HTMLImageElement[] = [];
     let done = 0;
@@ -67,7 +58,18 @@ export function ScrollAnimation3D() {
       img.src = `${FRAME_BASE}${String(i + 1).padStart(6, '0')}.jpg`;
       img.onload = () => {
         done++;
-        if (i === 0) paintCurrent();
+        if (i === 0) {
+          // Retry hasta que el canvas tenga dimensiones reales
+          const tryPaint = () => {
+            const canvas = canvasRef.current;
+            if (canvas && canvas.offsetWidth > 0) {
+              paint(img);
+            } else {
+              requestAnimationFrame(tryPaint);
+            }
+          };
+          tryPaint();
+        }
         setLoadedCount(done);
       };
       img.onerror = () => { done++; setLoadedCount(done); };
@@ -77,17 +79,22 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ResizeObserver — pinta cuando el canvas recibe dimensiones reales
+  // ResizeObserver — repinta al cambiar tamaño del canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ro = new ResizeObserver(() => paintCurrent());
+    const ro = new ResizeObserver(() => {
+      // Reset dimensiones para forzar recálculo
+      canvas.width = 0;
+      canvas.height = 0;
+      paintCurrent();
+    });
     ro.observe(canvas);
     return () => ro.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Scroll → avanza frames + oculta hint
+  // Scroll → avanza frames
   useEffect(() => {
     const tick = () => {
       raf.current = 0;
@@ -99,8 +106,6 @@ export function ScrollAnimation3D() {
       if (scrollable <= 0) return;
 
       const scrolled = Math.max(0, -rect.top);
-
-      // Ocultar hint al primer scroll dentro de la sección
       if (scrolled > 10) setShowHint(false);
 
       const progress = Math.min(1, scrolled / scrollable);
@@ -118,7 +123,6 @@ export function ScrollAnimation3D() {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (raf.current) cancelAnimationFrame(raf.current);
@@ -148,32 +152,44 @@ export function ScrollAnimation3D() {
       style={{ height: '500vh' }}
     >
       {/*
-        sticky: usa min-h con fallback para iOS Safari
-        - 100dvh: descuenta barra browser en mobile
-        - fallback a 100vh para browsers sin soporte dvh
+        sticky wrapper: altura = 100vw / (16/9) capped a 100dvh
+        Esto hace que el canvas ocupe exactamente el ancho de pantalla
+        con la altura correcta para 16:9, sin barras negras.
+        Si el viewport es muy alto (ultrawide vertical), se capa a 100dvh.
       */}
       <div
-        ref={stickyRef}
-        className="scroll3d-sticky sticky top-0 w-full overflow-hidden"
+        className="sticky top-0 w-full overflow-hidden flex items-center justify-center bg-black"
+        style={{ height: '100dvh' }}
       >
+        {/*
+          El canvas tiene aspect-ratio 16/9 forzado.
+          max-w y max-h garantizan que nunca sobrepase el viewport.
+          object-fit: fill en el canvas porque el tamaño ya es el correcto.
+        */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ display: 'block' }}
+          className="block"
+          style={{
+            aspectRatio: '16 / 9',
+            width: '100%',
+            maxWidth: `calc(100dvh * ${VIDEO_ASPECT})`,
+            maxHeight: '100dvh',
+            display: 'block',
+          }}
         />
 
-        {/* Gradiente inferior — funde hacia Services (#060B12) */}
+        {/* Gradiente inferior */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
           style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
         />
 
-        {/* Scroll hint — aparece al inicio, desaparece al scrollear */}
+        {/* Scroll hint */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-20"
           initial={{ opacity: 0 }}
           animate={{ opacity: showHint ? 1 : 0 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
         >
           <span className="text-[10px] text-white/50 tracking-[0.25em] uppercase font-mono">scroll</span>
           <div className="w-px h-10 bg-gradient-to-b from-white/40 to-transparent animate-scroll-bounce" />
