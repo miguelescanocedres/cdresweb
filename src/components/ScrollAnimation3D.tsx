@@ -13,41 +13,39 @@ export function ScrollAnimation3D() {
   const raf = useRef<number>(0);
   const [loadedCount, setLoadedCount] = useState(0);
 
-  // Redimensionar canvas al tamaño real del elemento (DPR-aware)
-  const sizeCanvas = (canvas: HTMLCanvasElement) => {
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.offsetWidth;
-    const h = canvas.offsetHeight;
-    if (w === 0 || h === 0) return false;
-    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-    }
-    return true;
-  };
-
-  // Dibujar frame con cover-fit
+  // paint — siempre recalcula dimensiones desde offsetWidth/Height actuales
   const paint = (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas || !img?.complete || !img.naturalWidth) return;
-    if (!sizeCanvas(canvas)) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if (w === 0 || h === 0) return;
+
+    // Solo redimensiona si cambió (evita flush de layout innecesario)
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const dw = canvas.offsetWidth;
-    const dh = canvas.offsetHeight;
+    // cover-fit: imagen cubre todo el canvas sin letterbox
     const ia = img.naturalWidth / img.naturalHeight;
-    const ca = dw / dh;
+    const ca = w / h;
+    let dw = w, dh = h, dx = 0, dy = 0;
+    if (ia > ca) { dw = h * ia; dx = (w - dw) / 2; }
+    else         { dh = w / ia; dy = (h - dh) / 2; }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.drawImage(img, dx, dy, dw, dh);
+  };
 
-    let w = dw, h = dh, x = 0, y = 0;
-    if (ia > ca) { w = dh * ia; x = (dw - w) / 2; }
-    else { h = dw / ia; y = (dh - h) / 2; }
-
-    ctx.drawImage(img, x, y, w, h);
+  const paintCurrent = () => {
+    const img = images.current[currentFrame.current];
+    if (img?.complete) paint(img);
   };
 
   // Precarga progresiva
@@ -61,7 +59,8 @@ export function ScrollAnimation3D() {
       img.src = `${FRAME_BASE}${String(i + 1).padStart(6, '0')}.jpg`;
       img.onload = () => {
         done++;
-        if (i === 0) paint(img);
+        // frame 0: intentar pintar — si el canvas ya tiene tamaño, dibuja; si no, ResizeObserver lo hará
+        if (i === 0) paintCurrent();
         setLoadedCount(done);
       };
       img.onerror = () => { done++; setLoadedCount(done); };
@@ -71,7 +70,21 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Scroll → frame con RAF throttle
+  // ResizeObserver — dispara cuando el canvas recibe dimensiones reales del browser
+  // Esto garantiza el primer paint sin importar el orden carga-vs-layout
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ro = new ResizeObserver(() => {
+      paintCurrent();
+    });
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Scroll → avanza frames
   useEffect(() => {
     const tick = () => {
       raf.current = 0;
@@ -86,11 +99,9 @@ export function ScrollAnimation3D() {
       const progress = Math.min(1, scrolled / scrollable);
       const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
 
-      if (idx !== currentFrame.current) {
-        currentFrame.current = idx;
-        const img = images.current[idx];
-        if (img?.complete) paint(img);
-      }
+      currentFrame.current = idx;
+      const img = images.current[idx];
+      if (img?.complete) paint(img);
     };
 
     const onScroll = () => {
@@ -99,14 +110,8 @@ export function ScrollAnimation3D() {
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Primer paint diferido: esperar a que el layout esté completo
-    // (requestAnimationFrame garantiza que offsetWidth ya tiene valor real)
-    raf.current = requestAnimationFrame(() => {
-      raf.current = 0;
-      const img = images.current[0];
-      if (img?.complete) paint(img);
-    });
+    // Trigger inmediato para calcular frame correcto si página ya scrolleó
+    onScroll();
 
     return () => {
       window.removeEventListener('scroll', onScroll);
@@ -115,17 +120,16 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resize: recalcular canvas y repintar frame actual
+  // Resize de ventana — forzar recálculo y repaint
   useEffect(() => {
     const onResize = () => {
       const canvas = canvasRef.current;
       if (canvas) {
-        // Forzar recálculo de dimensiones
+        // Reset dimensiones para forzar recálculo en próximo paint
         canvas.width = 0;
         canvas.height = 0;
       }
-      const img = images.current[currentFrame.current];
-      if (img?.complete) paint(img);
+      paintCurrent();
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -141,6 +145,7 @@ export function ScrollAnimation3D() {
       className="relative w-full bg-black"
       style={{ height: '500vh' }}
     >
+      {/* sticky: ocupa 100dvh — dvh descuenta barra browser en mobile */}
       <div className="sticky top-0 w-full overflow-hidden" style={{ height: '100dvh' }}>
         <canvas
           ref={canvasRef}
@@ -148,13 +153,13 @@ export function ScrollAnimation3D() {
           style={{ display: 'block' }}
         />
 
-        {/* Gradiente inferior — fluye hacia Services */}
+        {/* Gradiente inferior — funde hacia #060B12 (fondo de Services) */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
           style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
         />
 
-        {/* Barra de carga */}
+        {/* Barra de carga discreta */}
         {loading && (
           <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
             <div
