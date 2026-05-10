@@ -114,6 +114,12 @@ export function ScrollAnimation3D() {
       currentFrame.current = idx;
       const img = images.current[idx];
       if (img?.complete) paint(img);
+
+      // Desplaza el canvas hacia abajo a medida que avanza la animación
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.style.transform = `translateY(${progress * 12}%)`;
+      }
     };
 
     const onScroll = () => {
