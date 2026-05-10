@@ -206,6 +206,14 @@
   }
 }
 
+/* iOS Safari: sticky canvas viewport fix */
+.scroll3d-sticky {
+  height: 100vh;
+  height: 100dvh;
+  /* Fallback para iOS Safari < 15.4 que no soporta dvh */
+  height: -webkit-fill-available;
+}
+
 @keyframes glow-pulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50%       { opacity: 1;   transform: scale(1.08); }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 
 const TOTAL_FRAMES = 192;
 const FRAME_BASE = '/frames/frame_';
@@ -8,12 +9,14 @@ const FRAME_BASE = '/frames/frame_';
 export function ScrollAnimation3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const images = useRef<HTMLImageElement[]>([]);
   const currentFrame = useRef(0);
   const raf = useRef<number>(0);
   const [loadedCount, setLoadedCount] = useState(0);
+  const [showHint, setShowHint] = useState(true);
 
-  // paint — siempre recalcula dimensiones desde offsetWidth/Height actuales
+  // paint — cover-fit, recalcula dimensiones desde el elemento real
   const paint = (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas || !img?.complete || !img.naturalWidth) return;
@@ -23,7 +26,6 @@ export function ScrollAnimation3D() {
     const h = canvas.offsetHeight;
     if (w === 0 || h === 0) return;
 
-    // Solo redimensiona si cambió (evita flush de layout innecesario)
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -32,7 +34,6 @@ export function ScrollAnimation3D() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // cover-fit: imagen cubre todo el canvas sin letterbox
     const ia = img.naturalWidth / img.naturalHeight;
     const ca = w / h;
     let dw = w, dh = h, dx = 0, dy = 0;
@@ -59,7 +60,6 @@ export function ScrollAnimation3D() {
       img.src = `${FRAME_BASE}${String(i + 1).padStart(6, '0')}.jpg`;
       img.onload = () => {
         done++;
-        // frame 0: intentar pintar — si el canvas ya tiene tamaño, dibuja; si no, ResizeObserver lo hará
         if (i === 0) paintCurrent();
         setLoadedCount(done);
       };
@@ -70,21 +70,17 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ResizeObserver — dispara cuando el canvas recibe dimensiones reales del browser
-  // Esto garantiza el primer paint sin importar el orden carga-vs-layout
+  // ResizeObserver — pinta cuando el canvas recibe dimensiones reales
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ro = new ResizeObserver(() => {
-      paintCurrent();
-    });
+    const ro = new ResizeObserver(() => paintCurrent());
     ro.observe(canvas);
     return () => ro.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Scroll → avanza frames
+  // Scroll → avanza frames + oculta hint
   useEffect(() => {
     const tick = () => {
       raf.current = 0;
@@ -96,6 +92,10 @@ export function ScrollAnimation3D() {
       if (scrollable <= 0) return;
 
       const scrolled = Math.max(0, -rect.top);
+
+      // Ocultar hint al primer scroll dentro de la sección
+      if (scrolled > 10) setShowHint(false);
+
       const progress = Math.min(1, scrolled / scrollable);
       const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
 
@@ -110,7 +110,6 @@ export function ScrollAnimation3D() {
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    // Trigger inmediato para calcular frame correcto si página ya scrolleó
     onScroll();
 
     return () => {
@@ -120,15 +119,11 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resize de ventana — forzar recálculo y repaint
+  // Resize de ventana
   useEffect(() => {
     const onResize = () => {
       const canvas = canvasRef.current;
-      if (canvas) {
-        // Reset dimensiones para forzar recálculo en próximo paint
-        canvas.width = 0;
-        canvas.height = 0;
-      }
+      if (canvas) { canvas.width = 0; canvas.height = 0; }
       paintCurrent();
     };
     window.addEventListener('resize', onResize);
@@ -145,23 +140,41 @@ export function ScrollAnimation3D() {
       className="relative w-full bg-black"
       style={{ height: '500vh' }}
     >
-      {/* sticky: ocupa 100dvh — dvh descuenta barra browser en mobile */}
-      <div className="sticky top-0 w-full overflow-hidden" style={{ height: '100dvh' }}>
+      {/*
+        sticky: usa min-h con fallback para iOS Safari
+        - 100dvh: descuenta barra browser en mobile
+        - fallback a 100vh para browsers sin soporte dvh
+      */}
+      <div
+        ref={stickyRef}
+        className="scroll3d-sticky sticky top-0 w-full overflow-hidden"
+      >
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
           style={{ display: 'block' }}
         />
 
-        {/* Gradiente inferior — funde hacia #060B12 (fondo de Services) */}
+        {/* Gradiente inferior — funde hacia Services (#060B12) */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
           style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
         />
 
-        {/* Barra de carga discreta */}
+        {/* Scroll hint — aparece al inicio, desaparece al scrollear */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showHint ? 1 : 0 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
+        >
+          <span className="text-[10px] text-white/50 tracking-[0.25em] uppercase font-mono">scroll</span>
+          <div className="w-px h-10 bg-gradient-to-b from-white/40 to-transparent animate-scroll-bounce" />
+        </motion.div>
+
+        {/* Barra de carga */}
         {loading && (
-          <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
+          <div className="absolute bottom-0 left-0 right-0 z-30 h-0.5 bg-white/10">
             <div
               className="h-full bg-blue-500 transition-all duration-75"
               style={{ width: `${pct}%` }}
