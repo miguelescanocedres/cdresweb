@@ -20,7 +20,7 @@ export function ScrollAnimation3D({
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const frameImagesRef = useRef<HTMLImageElement[]>([]);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
 
   // Precargar todas las imágenes
   useEffect(() => {
@@ -116,7 +116,7 @@ export function ScrollAnimation3D({
         const frameIndex = Math.floor(progress * (TOTAL_FRAMES - 1));
         setCurrentFrame(frameIndex);
 
-        rafRef.current = undefined;
+        rafRef.current = 0;
       });
     };
 
