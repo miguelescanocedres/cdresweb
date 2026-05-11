@@ -15,6 +15,8 @@ export function ScrollAnimation3D() {
   const raf = useRef<number>(0);
   const [loadedCount, setLoadedCount] = useState(0);
   const [showHint, setShowHint] = useState(true);
+  const [stickyH, setStickyH] = useState('100dvh');
+  const [sectionH, setSectionH] = useState('220vh');
 
   // Dibuja img en canvas — canvas tiene exactamente el aspect ratio del video,
   // así que siempre es un fill 1:1 sin barras ni recorte
@@ -131,15 +133,26 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resize de ventana
+  // Resize de ventana + calcular alturas reales para mobile
   useEffect(() => {
-    const onResize = () => {
+    const update = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      // Altura real del canvas: video 16:9 contain dentro del viewport
+      const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
+      setStickyH(`${canvasH}px`);
+      // Section height proporcional: si canvasH < vh (portrait mobile) reducir
+      const ratio = canvasH / vh;
+      setSectionH(`${Math.round(220 * ratio)}vh`);
+
       const canvas = canvasRef.current;
       if (canvas) { canvas.width = 0; canvas.height = 0; }
       paintCurrent();
     };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+
+    update(); // llamada inicial
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -150,29 +163,17 @@ export function ScrollAnimation3D() {
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: '220vh', background: '#060B12' }}
+      style={{ height: sectionH, background: '#060B12' }}
     >
-      {/*
-        sticky wrapper: altura = 100vw / (16/9) capped a 100dvh
-        Esto hace que el canvas ocupe exactamente el ancho de pantalla
-        con la altura correcta para 16:9, sin barras negras.
-        Si el viewport es muy alto (ultrawide vertical), se capa a 100dvh.
-      */}
       <div
         className="sticky top-0 w-full overflow-hidden flex items-start justify-center"
-        style={{ height: '100dvh', background: 'transparent' }}
+        style={{ height: stickyH, background: 'transparent' }}
       >
-        {/*
-          El canvas tiene aspect-ratio 16/9 forzado.
-          max-w y max-h garantizan que nunca sobrepase el viewport.
-          object-fit: fill en el canvas porque el tamaño ya es el correcto.
-        */}
         <canvas
           ref={canvasRef}
           className="block"
           style={{
             aspectRatio: '16 / 9',
-            /* Desktop/landscape: limitado por altura del viewport */
             width: `min(100vw, calc(100dvh * ${VIDEO_ASPECT}))`,
             maxWidth: '100vw',
             maxHeight: '100dvh',
