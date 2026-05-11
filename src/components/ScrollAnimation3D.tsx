@@ -141,9 +141,10 @@ export function ScrollAnimation3D() {
       // Altura real del canvas: video 16:9 contain dentro del viewport
       const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
       setStickyH(`${canvasH}px`);
-      // sectionH en px: canvasH (sticky) + scroll extra de 1.2x el canvas
-      // Esto garantiza que el scroll sea proporcional al canvas visible, no al viewport
-      setSectionH(`${Math.round(canvasH * 2.2)}px`);
+      // sectionH debe ser > vh para que haya scroll real (scrollable = sectionH - vh > 0)
+      // Usamos max(vh, canvasH) * 2.2 para garantizar rango de scroll en portrait y landscape
+      const baseH = Math.max(vh, canvasH);
+      setSectionH(`${Math.round(baseH * 2.2)}px`);
 
       const canvas = canvasRef.current;
       if (canvas) { canvas.width = 0; canvas.height = 0; }
