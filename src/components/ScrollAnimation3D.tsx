@@ -16,7 +16,7 @@ export function ScrollAnimation3D() {
   const [loadedCount, setLoadedCount] = useState(0);
   const [showHint, setShowHint] = useState(true);
   const [stickyH, setStickyH] = useState('100dvh');
-  const [sectionH, setSectionH] = useState('220vh');
+  const [sectionH, setSectionH] = useState('220dvh');
 
   // Dibuja img en canvas — canvas tiene exactamente el aspect ratio del video,
   // así que siempre es un fill 1:1 sin barras ni recorte
@@ -141,13 +141,14 @@ export function ScrollAnimation3D() {
       // Altura real del canvas: video 16:9 contain dentro del viewport
       const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
       setStickyH(`${canvasH}px`);
-      // Section height proporcional: si canvasH < vh (portrait mobile) reducir
-      const ratio = canvasH / vh;
-      setSectionH(`${Math.round(220 * ratio)}vh`);
+      // sectionH en px: canvasH (sticky) + scroll extra de 1.2x el canvas
+      // Esto garantiza que el scroll sea proporcional al canvas visible, no al viewport
+      setSectionH(`${Math.round(canvasH * 2.2)}px`);
 
       const canvas = canvasRef.current;
       if (canvas) { canvas.width = 0; canvas.height = 0; }
-      paintCurrent();
+      // Repaint diferido: esperar a que React aplique los nuevos estados de altura
+      requestAnimationFrame(() => paintCurrent());
     };
 
     update(); // llamada inicial
