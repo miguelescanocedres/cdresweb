@@ -17,6 +17,7 @@ export function ScrollAnimation3D() {
   const [showHint, setShowHint] = useState(true);
   const [stickyH, setStickyH] = useState('100dvh');
   const [sectionH, setSectionH] = useState('220dvh');
+  const [isMobilePortrait, setIsMobilePortrait] = useState(false);
 
   // Dibuja img en canvas — canvas tiene exactamente el aspect ratio del video,
   // así que siempre es un fill 1:1 sin barras ni recorte
@@ -40,8 +41,20 @@ export function ScrollAnimation3D() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // Canvas ya tiene el aspect ratio correcto → fill directo, sin barras
-    ctx.drawImage(img, 0, 0, w, h);
+
+    const portrait = w < h;
+    if (portrait) {
+      // Cover-fit: escala para cubrir todo el canvas, recorta lo que sobra
+      const ia = img.naturalWidth / img.naturalHeight;
+      const ca = w / h;
+      let dw = w, dh = h, dx = 0, dy = 0;
+      if (ia > ca) { dh = h; dw = h * ia; dx = (w - dw) / 2; }
+      else         { dw = w; dh = w / ia; dy = (h - dh) / 2; }
+      ctx.drawImage(img, dx, dy, dw, dh);
+    } else {
+      // Landscape/desktop: fill directo (canvas ya tiene aspect ratio del video)
+      ctx.drawImage(img, 0, 0, w, h);
+    }
   };
 
   const paintCurrent = () => {
@@ -133,26 +146,33 @@ export function ScrollAnimation3D() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resize de ventana + calcular alturas reales para mobile
+  // Resize de ventana + calcular alturas reales
   useEffect(() => {
     const update = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      // Altura real del canvas: video 16:9 contain dentro del viewport
-      const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
-      setStickyH(`${canvasH}px`);
-      // sectionH debe ser > vh para que haya scroll real (scrollable = sectionH - vh > 0)
-      // Usamos max(vh, canvasH) * 2.2 para garantizar rango de scroll en portrait y landscape
-      const baseH = Math.max(vh, canvasH);
-      setSectionH(`${Math.round(baseH * 2.2)}px`);
+      const portrait = vw < vh; // portrait cuando el ancho es menor que el alto
+
+      setIsMobilePortrait(portrait);
+
+      if (portrait) {
+        // Portrait mobile: canvas llena 100vw × 100dvh con cover (recorta lados)
+        // → stickyH = vh, sectionH = vh*2.2 → scrollable = vh*1.2 > 0 → animación funciona
+        setStickyH(`${vh}px`);
+        setSectionH(`${Math.round(vh * 2.2)}px`);
+      } else {
+        // Landscape / desktop: contain dentro del viewport
+        const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
+        setStickyH(`${canvasH}px`);
+        setSectionH(`${Math.round(vh * 2.2)}px`);
+      }
 
       const canvas = canvasRef.current;
       if (canvas) { canvas.width = 0; canvas.height = 0; }
-      // Repaint diferido: esperar a que React aplique los nuevos estados de altura
       requestAnimationFrame(() => paintCurrent());
     };
 
-    update(); // llamada inicial
+    update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,8 +194,14 @@ export function ScrollAnimation3D() {
         <canvas
           ref={canvasRef}
           className="block"
-          style={{
-            aspectRatio: '16 / 9',
+          style={isMobilePortrait ? {
+            // Portrait: llena pantalla completa, cover recorta lados del video
+            width: '100vw',
+            height: '100%',
+            display: 'block',
+          } : {
+            // Landscape/desktop: contain sin barras
+            aspectRatio: `${VIDEO_ASPECT}`,
             width: `min(100vw, calc(100dvh * ${VIDEO_ASPECT}))`,
             maxWidth: '100vw',
             maxHeight: '100dvh',
