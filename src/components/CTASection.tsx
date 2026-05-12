@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CosmicButton } from "@/components/ui/cosmic-button";
 
 export function CTASection() {
   return (
@@ -73,15 +74,12 @@ export function CTASection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <a
-            href="mailto:hola@cdres.com"
-            className="gradient-blue text-white font-semibold px-8 py-4 rounded-lg hover:opacity-90 hover:scale-[1.02] transition-all glow-blue text-sm inline-flex items-center gap-2 justify-center tracking-wide focus-visible:ring-2 focus-visible:ring-[#0066FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060B12]"
-          >
+          <CosmicButton href="mailto:hola@cdres.com">
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             Agendar llamada gratuita
-          </a>
+          </CosmicButton>
           <a
             href="https://wa.me/59898331920?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20servicios"
             target="_blank"

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { CosmicButton } from "@/components/ui/cosmic-button";
 
 const navLinks = [
   { label: "Servicios", href: "#servicios" },
@@ -81,12 +82,9 @@ export function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:block">
-          <Link
-            href="#contacto"
-            className="gradient-blue text-white text-sm font-medium px-5 py-2.5 rounded-md hover:opacity-90 hover:scale-[1.02] transition-all glow-blue focus-visible:ring-2 focus-visible:ring-[#0066FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060B12]"
-          >
+          <CosmicButton href="#contacto" className="text-sm">
             Agendar llamada
-          </Link>
+          </CosmicButton>
         </div>
 
         {/* Mobile menu button */}

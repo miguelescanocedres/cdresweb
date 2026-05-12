@@ -229,6 +229,15 @@
   to   { transform: rotate(360deg); }
 }
 
+@keyframes cosmic-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes cosmic-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
 /* Animation classes */
 .animate-float         { animation: float 5s ease-in-out infinite; }
 .animate-float-delayed { animation: float 5s ease-in-out 1.5s infinite; }
@@ -239,3 +248,5 @@
 .animate-orbit-wide    { animation: orbit-ring-wide 20s linear infinite; }
 .animate-glow-pulse    { animation: glow-pulse 3s ease-in-out infinite; }
 .animate-scroll-bounce { animation: scroll-bounce 1.5s ease-in-out infinite; }
+.animate-cosmic-spin      { animation: cosmic-spin 3s linear infinite; }
+.animate-cosmic-spin-slow { animation: cosmic-spin-slow 5s linear infinite; }
