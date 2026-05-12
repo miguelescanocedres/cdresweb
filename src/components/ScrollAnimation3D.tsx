@@ -156,10 +156,10 @@ export function ScrollAnimation3D() {
       setIsMobilePortrait(portrait);
 
       if (portrait) {
-        // Portrait mobile: canvas llena 100vw × 100dvh con cover (recorta lados)
-        // → stickyH = vh, sectionH = vh*2.2 → scrollable = vh*1.2 > 0 → animación funciona
+        // Portrait mobile: canvas llena 100vw × 100dvh con cover
+        // sectionH = vh*1.45 → scrollable = vh*0.45 > 0 → animación funciona, gap mínimo
         setStickyH(`${vh}px`);
-        setSectionH(`${Math.round(vh * 2.2)}px`);
+        setSectionH(`${Math.round(vh * 1.45)}px`);
       } else {
         // Landscape / desktop: contain dentro del viewport
         const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
@@ -212,7 +212,7 @@ export function ScrollAnimation3D() {
         {/* Gradiente inferior */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: '18vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
+          style={{ height: '28vh', background: 'linear-gradient(to bottom, transparent, #060B12)' }}
         />
 
         {/* Scroll hint */}
