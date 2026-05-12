@@ -42,19 +42,8 @@ export function ScrollAnimation3D() {
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const portrait = w < h;
-    if (portrait) {
-      // Cover-fit: escala para cubrir todo el canvas, recorta lo que sobra
-      const ia = img.naturalWidth / img.naturalHeight;
-      const ca = w / h;
-      let dw = w, dh = h, dx = 0, dy = 0;
-      if (ia > ca) { dh = h; dw = h * ia; dx = (w - dw) / 2; }
-      else         { dw = w; dh = w / ia; dy = (h - dh) / 2; }
-      ctx.drawImage(img, dx, dy, dw, dh);
-    } else {
-      // Landscape/desktop: fill directo (canvas ya tiene aspect ratio del video)
-      ctx.drawImage(img, 0, 0, w, h);
-    }
+    // Fill directo: canvas siempre tiene el aspect ratio del video (portrait y landscape)
+    ctx.drawImage(img, 0, 0, w, h);
   };
 
   const paintCurrent = () => {
@@ -156,10 +145,11 @@ export function ScrollAnimation3D() {
       setIsMobilePortrait(portrait);
 
       if (portrait) {
-        // Portrait mobile: canvas llena 100vw × 100dvh con cover
-        // sectionH = vh*1.45 → scrollable = vh*0.45 > 0 → animación funciona, gap mínimo
-        setStickyH(`${vh}px`);
-        setSectionH(`${Math.round(vh * 1.45)}px`);
+        // Portrait mobile: canvas = 100vw × (vw/aspect) — sin overflow, sin cover
+        // stickyH = canvasH para que el sticky contenga exactamente el canvas
+        const canvasH = Math.round(vw / VIDEO_ASPECT);
+        setStickyH(`${canvasH}px`);
+        setSectionH(`${Math.round(canvasH * 2.2)}px`);
       } else {
         // Landscape / desktop: contain dentro del viewport
         const canvasH = Math.min(vh, vw / VIDEO_ASPECT);
@@ -195,9 +185,9 @@ export function ScrollAnimation3D() {
           ref={canvasRef}
           className="block"
           style={isMobilePortrait ? {
-            // Portrait: llena pantalla completa, cover recorta lados del video
+            // Portrait: 100vw de ancho, alto proporcional al aspect ratio — sin overflow
             width: '100vw',
-            height: '100%',
+            height: `calc(100vw / ${VIDEO_ASPECT})`,
             display: 'block',
           } : {
             // Landscape/desktop: contain sin barras
