@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { AnimatedHeading } from "@/components/ui/animated-heading";
 
 const steps = [
   {
@@ -70,10 +71,14 @@ export function HowItWorks() {
           <p className="text-xs font-mono tracking-[0.25em] text-[#00E479] uppercase mb-4">
             // Nuestro proceso
           </p>
-          <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold text-white mb-5 tracking-tight">
-            De la idea al sistema{" "}
-            <span className="gradient-text">que funciona</span>
-          </h2>
+          <AnimatedHeading
+            segments={[
+              { text: "De la idea al sistema" },
+              { text: "que funciona", className: "gradient-text" },
+            ]}
+            className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold mb-5 tracking-tight justify-center"
+            delay={0.1}
+          />
           <p className="text-[#8892A4] max-w-lg mx-auto leading-relaxed">
             Un proceso probado, sin sorpresas. Sabés exactamente en qué etapa
             está tu proyecto en todo momento.

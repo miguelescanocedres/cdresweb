@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { GradientAnimation } from "@/components/ui/bg-animated-gradient";
+import { AnimatedHeading } from "@/components/ui/animated-heading";
 
 const differentiators = [
   {
@@ -116,10 +117,14 @@ export function WhyCdres() {
             <p className="text-xs font-mono tracking-[0.25em] text-[#0066FF] uppercase mb-4">
               // Por qué <span className="text-white">C</span><span className="text-[#0066FF]">DRES</span> <span className="text-[#8892A4]">INTEC</span>
             </p>
-            <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-              No somos otra{" "}
-              <span className="gradient-text">agencia</span>
-            </h2>
+            <AnimatedHeading
+              segments={[
+                { text: "No somos otra" },
+                { text: "agencia", className: "gradient-text" },
+              ]}
+              className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold mb-6 tracking-tight leading-tight"
+              delay={0.15}
+            />
             <p className="text-[#8892A4] leading-relaxed mb-5">
               La mayoría de las agencias vende horas. Nosotros vendemos el ahorro de tiempo
               y el aumento de eficiencia que nuestros sistemas generan para tu empresa.

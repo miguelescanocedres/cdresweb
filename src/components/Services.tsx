@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { GradientAnimation } from "@/components/ui/bg-animated-gradient";
+import { AnimatedHeading } from "@/components/ui/animated-heading";
 
 const services = [
   {
@@ -116,10 +117,14 @@ export function Services() {
           <p className="text-xs font-mono tracking-[0.25em] text-[#0066FF] uppercase mb-4">
             // Lo que construimos
           </p>
-          <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold text-white mb-5 tracking-tight">
-            Servicios que generan{" "}
-            <span className="gradient-text">resultados</span>
-          </h2>
+          <AnimatedHeading
+            segments={[
+              { text: "Servicios que generan" },
+              { text: "resultados", className: "gradient-text" },
+            ]}
+            className="font-[family-name:var(--font-heading)] text-3xl md:text-5xl font-bold mb-5 tracking-tight justify-center"
+            delay={0.1}
+          />
           <p className="text-[#8892A4] max-w-lg mx-auto leading-relaxed">
             No vendemos horas. Vendemos el ahorro de tiempo y el aumento de eficiencia
             que nuestros sistemas generan para tu empresa.

@@ -2,12 +2,27 @@
 
 import { motion } from "framer-motion";
 import { CosmicButton } from "@/components/ui/cosmic-button";
+import { GradientAnimation } from "@/components/ui/bg-animated-gradient";
+import { AnimatedHeading } from "@/components/ui/animated-heading";
 
 export function CTASection() {
   return (
     <section id="contacto" className="py-32 relative overflow-hidden" style={{ background: "#060B12" }}>
       {/* Grid */}
       <div className="absolute inset-0 bg-grid opacity-80 pointer-events-none" />
+
+      {/* Gradient animation background */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none">
+        <GradientAnimation
+          gradients={[
+            { stops: [{ color: "#0066FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 50, centerY: 0 },
+            { stops: [{ color: "#00D4FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 20, centerY: 100 },
+            { stops: [{ color: "#00E479", position: 0 }, { color: "transparent", position: 100 }], centerX: 80, centerY: 100 },
+          ]}
+          animationDuration={12}
+          className="w-full h-full"
+        />
+      </div>
 
       {/* Central glow */}
       <div
@@ -43,16 +58,14 @@ export function CTASection() {
         </motion.p>
 
         {/* Headline */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number], delay: 0.1 }}
-          className="font-[family-name:var(--font-heading)] text-4xl md:text-6xl font-bold text-white mb-6 leading-tight tracking-tight"
-        >
-          ¿Listo para hacer crecer{" "}
-          <span className="gradient-text-animated">tu negocio?</span>
-        </motion.h2>
+        <AnimatedHeading
+          segments={[
+            { text: "¿Listo para hacer crecer" },
+            { text: "tu negocio?", className: "gradient-text-animated" },
+          ]}
+          className="font-[family-name:var(--font-heading)] text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight justify-center"
+          delay={0.15}
+        />
 
         {/* Subtext */}
         <motion.p
