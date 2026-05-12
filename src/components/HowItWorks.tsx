@@ -95,29 +95,36 @@ export function HowItWorks() {
               }}
               className="relative group"
             >
-              {/* Connector line (desktop) */}
+              {/* Connector line (desktop) — más visible con glow */}
               {i < steps.length - 1 && (
                 <div
                   className="hidden lg:block absolute top-6 left-full w-6 h-px z-0"
                   style={{
-                    background: `linear-gradient(90deg, rgba(${step.colorRgb},0.4), rgba(${steps[i+1].colorRgb},0.2))`,
+                    background: `linear-gradient(90deg, rgba(${step.colorRgb},0.7), rgba(${steps[i+1].colorRgb},0.3))`,
+                    boxShadow: `0 0 6px rgba(${step.colorRgb},0.4)`,
                   }}
                 />
               )}
 
               {/* Card */}
               <div
-                className="relative rounded-2xl p-6 h-full overflow-hidden transition-all duration-300"
+                className="relative rounded-2xl p-6 h-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1"
                 style={{
-                  background: "linear-gradient(145deg, rgba(14,21,37,0.8), rgba(10,16,32,0.8))",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "linear-gradient(145deg, rgba(14,21,37,0.9), rgba(10,16,32,0.9))",
+                  border: `1px solid rgba(${step.colorRgb},0.15)`,
+                  boxShadow: `0 0 0 1px rgba(${step.colorRgb},0.04), 0 4px 20px rgba(${step.colorRgb},0.06), inset 0 1px 0 rgba(255,255,255,0.03)`,
                 }}
               >
+                {/* Shimmer top line */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+                  style={{ background: `linear-gradient(90deg, transparent, rgba(${step.colorRgb},0.5), transparent)` }}
+                />
                 {/* Hover glow */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
                   style={{
-                    background: `radial-gradient(ellipse at top left, rgba(${step.colorRgb},0.07) 0%, transparent 65%)`,
+                    background: `radial-gradient(ellipse at top left, rgba(${step.colorRgb},0.1) 0%, transparent 65%)`,
                   }}
                 />
 

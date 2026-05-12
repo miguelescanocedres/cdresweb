@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { GradientAnimation } from "@/components/ui/bg-animated-gradient";
 
 const differentiators = [
   {
@@ -81,6 +82,18 @@ const stats = [
 export function WhyCdres() {
   return (
     <section id="nosotros" className="py-28 relative overflow-hidden" style={{ background: "#0A1020" }}>
+      {/* Gradient animation background */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <GradientAnimation
+          gradients={[
+            { stops: [{ color: "#0066FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 90, centerY: 10 },
+            { stops: [{ color: "#00D4FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 10, centerY: 90 },
+          ]}
+          animationDuration={10}
+          className="w-full h-full"
+        />
+      </div>
+
       {/* Ambient glow */}
       <div
         className="absolute top-0 right-0 pointer-events-none"
@@ -125,10 +138,11 @@ export function WhyCdres() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 + i * 0.1, ease: "easeOut" }}
-                  className="text-center p-5 rounded-2xl relative overflow-hidden"
+                  className="text-center p-5 rounded-2xl relative overflow-hidden group cursor-default"
                   style={{
-                    background: "linear-gradient(145deg, rgba(14,21,37,0.8), rgba(10,16,32,0.8))",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "linear-gradient(145deg, rgba(14,21,37,0.9), rgba(10,16,32,0.9))",
+                    border: "1px solid rgba(0,102,255,0.18)",
+                    boxShadow: "0 0 0 1px rgba(0,102,255,0.04), 0 4px 20px rgba(0,102,255,0.08), inset 0 1px 0 rgba(0,212,255,0.06)",
                   }}
                 >
                   <div
@@ -161,18 +175,24 @@ export function WhyCdres() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 + i * 0.08, ease: "easeOut" }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                whileHover={{ y: -5, transition: { duration: 0.25, ease: [0.25, 0.4, 0.25, 1] } }}
                 className="group relative rounded-2xl p-5 cursor-default overflow-hidden"
                 style={{
-                  background: "linear-gradient(145deg, rgba(14,21,37,0.8), rgba(10,16,32,0.8))",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "linear-gradient(145deg, rgba(14,21,37,0.9), rgba(10,16,32,0.9))",
+                  border: `1px solid rgba(${item.colorRgb},0.14)`,
+                  boxShadow: `0 0 0 1px rgba(${item.colorRgb},0.03), 0 4px 16px rgba(${item.colorRgb},0.05), inset 0 1px 0 rgba(255,255,255,0.03)`,
                 }}
               >
+                {/* Shimmer top line permanente */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+                  style={{ background: `linear-gradient(90deg, transparent, rgba(${item.colorRgb},0.45), transparent)` }}
+                />
                 {/* Hover glow */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl pointer-events-none"
                   style={{
-                    background: `radial-gradient(ellipse at top left, rgba(${item.colorRgb},0.06) 0%, transparent 65%)`,
+                    background: `radial-gradient(ellipse at top left, rgba(${item.colorRgb},0.1) 0%, transparent 65%)`,
                   }}
                 />
 

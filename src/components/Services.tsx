@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { GradientAnimation } from "@/components/ui/bg-animated-gradient";
 
 const services = [
   {
@@ -90,7 +91,19 @@ const headerVariants = {
 
 export function Services() {
   return (
-    <section id="servicios" className="py-28" style={{ background: "#0A1020" }}>
+    <section id="servicios" className="py-28 relative overflow-hidden" style={{ background: "#0A1020" }}>
+      {/* Gradient animation background — muy sutil, profundidad sin distraer */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        <GradientAnimation
+          gradients={[
+            { stops: [{ color: "#0066FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 20, centerY: 20 },
+            { stops: [{ color: "#00D4FF", position: 0 }, { color: "transparent", position: 100 }], centerX: 80, centerY: 80 },
+            { stops: [{ color: "#00E479", position: 0 }, { color: "transparent", position: 100 }], centerX: 50, centerY: 10 },
+          ]}
+          animationDuration={8}
+          className="w-full h-full"
+        />
+      </div>
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -123,20 +136,29 @@ export function Services() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-60px" }}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            whileHover={{ y: -6, transition: { duration: 0.25, ease: [0.25, 0.4, 0.25, 1] } }}
             className="md:col-span-2 group relative rounded-2xl p-8 cursor-pointer overflow-hidden flex flex-col md:flex-row gap-8"
             style={{
               background: "linear-gradient(145deg, rgba(14,21,37,0.95), rgba(10,16,32,0.95))",
-              border: "1px solid rgba(255,255,255,0.07)",
+              border: "1px solid rgba(0,102,255,0.15)",
+              boxShadow: "0 0 0 1px rgba(0,102,255,0.05), 0 4px 24px rgba(0,102,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)",
             }}
           >
+            {/* Shimmer line top — visible siempre, más brillante en hover */}
             <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
-              style={{ background: `radial-gradient(ellipse at top left, rgba(${services[0].accentRgb},0.1) 0%, transparent 55%)` }}
+              className="absolute top-0 left-0 right-0 h-px transition-opacity duration-500"
+              style={{
+                background: `linear-gradient(90deg, transparent, rgba(${services[0].accentRgb},0.5), transparent)`,
+                opacity: 0.6,
+              }}
             />
             <div
-              className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{ background: `linear-gradient(90deg, transparent, rgba(${services[0].accentRgb},0.7), transparent)` }}
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
+              style={{ background: `radial-gradient(ellipse at top left, rgba(${services[0].accentRgb},0.12) 0%, transparent 55%)` }}
+            />
+            <div
+              className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ background: `linear-gradient(90deg, transparent, rgba(${services[0].accentRgb},1), transparent)` }}
             />
             <div className="flex-1 relative z-10">
               <div
@@ -178,20 +200,29 @@ export function Services() {
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-60px" }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              whileHover={{ y: -6, transition: { duration: 0.25, ease: [0.25, 0.4, 0.25, 1] } }}
               className="group relative rounded-2xl p-7 cursor-pointer overflow-hidden"
               style={{
                 background: "linear-gradient(145deg, rgba(14,21,37,0.9), rgba(10,16,32,0.9))",
-                border: "1px solid rgba(255,255,255,0.06)",
+                border: `1px solid rgba(${service.accentRgb},0.12)`,
+                boxShadow: `0 0 0 1px rgba(${service.accentRgb},0.04), 0 4px 20px rgba(${service.accentRgb},0.05), inset 0 1px 0 rgba(255,255,255,0.03)`,
               }}
             >
+              {/* Shimmer line top permanente */}
               <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
-                style={{ background: `radial-gradient(ellipse at top left, rgba(${service.accentRgb},0.08) 0%, transparent 60%)` }}
+                className="absolute top-0 left-0 right-0 h-px"
+                style={{
+                  background: `linear-gradient(90deg, transparent, rgba(${service.accentRgb},0.4), transparent)`,
+                  opacity: 0.7,
+                }}
               />
               <div
-                className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ background: `linear-gradient(90deg, transparent, rgba(${service.accentRgb},0.6), transparent)` }}
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
+                style={{ background: `radial-gradient(ellipse at top left, rgba(${service.accentRgb},0.1) 0%, transparent 60%)` }}
+              />
+              <div
+                className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: `linear-gradient(90deg, transparent, rgba(${service.accentRgb},0.9), transparent)` }}
               />
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center mb-5 relative z-10"
