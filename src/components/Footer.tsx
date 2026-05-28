@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function Footer() {
   const year = new Date().getFullYear();
 
@@ -6,11 +8,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
-          <div className="flex items-center gap-0">
-            <span className="font-[family-name:var(--font-heading)] text-lg font-bold text-white">C</span>
-            <span className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#0066FF]">DRES</span>
-            <span className="font-[family-name:var(--font-heading)] text-xs font-semibold text-[#8892A4] tracking-widest ml-2 self-center">INTEC</span>
-          </div>
+          <Image
+            src="/cdres-logo.png"
+            alt="CDRES INTEC"
+            width={800}
+            height={381}
+            unoptimized
+            className="h-9 w-auto"
+          />
 
           {/* Links */}
           <nav aria-label="Footer navigation">

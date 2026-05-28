@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { CosmicButton } from "@/components/ui/cosmic-button";
 
 const navLinks = [
@@ -32,39 +33,29 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative flex items-baseline gap-0">
-            <motion.span
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number], delay: 0.1 }}
-              className="text-xl font-bold text-white tracking-tight font-[family-name:var(--font-heading)]"
-            >
-              C
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number], delay: 0.22 }}
-              className="text-xl font-bold tracking-tight font-[family-name:var(--font-heading)] text-[#0066FF]"
-            >
-              DRES
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, x: -4 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number], delay: 0.35 }}
-              className="text-xs font-semibold tracking-widest text-[#8892A4] ml-2 self-center font-[family-name:var(--font-heading)]"
-            >
-              INTEC
-            </motion.span>
+        <Link href="/" className="flex items-center group cursor-pointer">
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number], delay: 0.1 }}
+            className="relative"
+          >
+            <Image
+              src="/cdres-logo.png"
+              alt="CDRES INTEC"
+              width={800}
+              height={381}
+              priority
+              unoptimized
+              className="h-10 w-auto md:h-12"
+            />
             <motion.span
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: "backOut", delay: 0.5 }}
-              className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-[#00E479] glow-emerald"
+              className="absolute top-0 -right-2 w-1.5 h-1.5 rounded-full bg-[#00E479] glow-emerald"
             />
-          </div>
+          </motion.div>
         </Link>
 
         {/* Desktop nav */}
